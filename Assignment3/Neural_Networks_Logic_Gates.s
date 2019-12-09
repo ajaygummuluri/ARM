@@ -1,61 +1,220 @@
-THUMB
-	 AREA     Neural_Networks_Logic_Gates, CODE, READONLY
-     EXPORT __main
-	 IMPORT printMsg
-     ENTRY 
-__main    FUNCTION
+;Neural network
+     THUMB
+	  AREA     factorial, CODE, READONLY
+	  IMPORT printMsg4p
+	  IMPORT printMsg
+      EXPORT __main
+      ENTRY 
+__main  FUNCTION	
+; IGNORE THIS PART 
 
-		
-		VLDR.F32 S7,=0.5	;	w0 
-		VLDR.F32 S8,=-0.7	;	w1 
-		VLDR.F32 S9,=-0.7	;	w2
-		
-		VLDR.F32 S13,=1	;	X0
-		VLDR.F32 S14,=0	;	X1
-		VLDR.F32 S15,=0	;	X2
-		
-		VLDR.F32 S25,=0.1	;	bias
-		VLDR.F32 S26,=0.5	;	0.5 to be added to end result
-		
-		VMUL.F32 S16,S7,S13	; w0*X0
-		VMUL.F32 S17,S8,S14	; w1*X1
-		VMUL.F32 S18,S9,S15	; w2*X2
-		
-		VADD.F32 S19,S16,S17	; (w0*X0)+(w1*X1)
-		VADD.F32 S20,S18,S19	; (w0*X0)+(w1*X1)+(w2*X2)
-		VADD.F32 S21,S20,S25	; (w0*X0)+(w1*X1)+(w2*X2)+bias
+	  MOV R4,#0x00000000	
+	  ;MOV R0,#0x00000001	 
+;Total number of gates
+      MOV R5,#0x00000007
+AllGates
+      ADD R4,#1
+      MOV R0,R4	  
+      CMP R4,#0x00000001
+	  BEQ Weight_and
+      CMP R4,#0x00000002	 
+	  BEQ Weight_or
+      CMP R4,#0x00000003	 
+	  BEQ Weight_not
+back
+      CMP R4,#0x00000004	 
+	  BEQ Weight_nand
+	  CMP R4,#0x00000005	 
+	  BEQ Weight_nor
+	  CMP R4,#0x00000006	 
+	  BEQ Weight_xor
+	  CMP R4,#0x00000007	 
+	  BEQ Weight_xnor
+      BLE AllGates
+      B stop
 
-		VMOV.F32 S2,S21	;	z=(w0*X0)+(w1*X1)+(w2*X2)+z
+Weight_and
+      BL printMsg
+;store weights (weights w1 w2 w3 corresponding to x1, x2, x3)
+      VLDR.F32 s9, =-0.1
+	  VLDR.F32 s10, =0.2
+	  VLDR.F32 s11, =0.2
+;bias	  
+	  VLDR.F32 s16, =-0.2
+      B dataset
+      ;BX lr
+	  
+Weight_or
+      BL printMsg
+;store weights (weights w1 w2 w3 corresponding to x1, x2, x3)
+      VLDR.F32 s9, =-0.1
+	  VLDR.F32 s10, =0.7
+	  VLDR.F32 s11, =0.7
+;bias	  
+	  VLDR.F32 s16, =-0.1
+      BL dataset
+      BX lr
 
+Weight_not
+      BL printMsg
+;store weights (weights w1 w2 w3 corresponding to x1, x2, x3)
+      VLDR.F32 s9, =0
+	  VLDR.F32 s10, =0.5
+	  VLDR.F32 s11, =-0.7
+	  
+;bias	  
+	  VLDR.F32 s16, =0.1	  
+      BL dataset
+      BX lr
+	  
+Weight_nand
+      BL printMsg
+;store weights (weights w1 w2 w3 corresponding to x1, x2, x3)
+      VLDR.F32 s9, =0.6
+	  VLDR.F32 s10, =-0.8
+	  VLDR.F32 s11, =-0.8
 
-Sigmoid MOV R0,#30		;Number of Terms in Series
-        MOV R1,#1		
-        VLDR.F32 S0,=1	;sum stored in S0
-        VLDR.F32 S1,=1	;Temporary Variable S1 
-		VLDR.F32 S6,=1	
-				
-		
-COUNT1  CMP R1,R0		;Compare 'i' and 'n' 
-        BLE LOOP1		;if i < n goto LOOP
-        B stop			;else goto stop
-		
-LOOP1   VMUL.F32 S1,S1,S2	; t = t * z
-        VMOV.F32 S5,R1		;Move bits in R1 to S5
-        VCVT.F32.U32 S5,S5	;Converting in to FP_format
-        VDIV.F32 S1,S1,S5	;Divide temp by 'i' 
-        VADD.F32 S0,S0,S1	;Adding previous sum to new term and store it back to sum
-		VDIV.F32 S10,S6,S0	; e power(-x)
-		VADD.F32 S11,S10,S6	; 1+(e power(-x))
-		VDIV.F32 S12,S6,S11	; 1/(1+(e power(-x)))
-		VMOV.F32 R0,S12
-		BL printMsg
-		VADD.F32 S12,S12,S26; Result=Result+0.5 (if result>0.5 ,output =1 else output=0)
-		VCVT.U32.F32 S12,S12	; Converting FP_format to Integer
-		VMOV.F32 R0,S12		; Move the Sigmoid value to R0
-		BL printMsg			
-        ADD R1,R1,#1		
-        B COUNT1			;Go to COUNT1
-		
-stop    B stop
-        ENDFUNC
-        END
+;bias	  
+	  VLDR.F32 s16, =0.3
+      BL dataset
+      BX lr
+	  
+Weight_nor
+      BL printMsg
+;store weights (weights w1 w2 w3 corresponding to x1, x2, x3)
+      VLDR.F32 s9, =0.5
+	  VLDR.F32 s10, =-0.7
+	  VLDR.F32 s11, =-0.7
+
+;bias	  
+	  VLDR.F32 s16, =0.1
+      BL dataset
+      BX lr
+
+Weight_xor
+      BL printMsg
+;store weights (weights w1 w2 w3 corresponding to x1, x2, x3)
+      VLDR.F32 s9, =-5
+	  VLDR.F32 s10, =20
+	  VLDR.F32 s11, =10
+
+;bias	  
+	  VLDR.F32 s16, =1
+      BL dataset
+	  BX lr
+	  
+Weight_xnor
+      BL printMsg
+;store weights (weights w1 w2 w3 corresponding to x1, x2, x3)
+      VLDR.F32 s9, =-5
+	  VLDR.F32 s10, =20
+	  VLDR.F32 s11, =10
+;bias	  
+	  VLDR.F32 s16, =1
+      BL dataset
+      BX lr
+	  
+dataset
+      MOV R8,#01
+	  MOV R9,#4
+	  B dataset1	  
+      ;BX lr
+ 
+dataset1
+
+      VLDR.F32 s12, =1
+	  VLDR.F32 s13, =0
+	  VLDR.F32 s14, =0
+	  BL calculate 
+dataset2
+      VLDR.F32 s12, =1
+	  VLDR.F32 s13, =0
+	  VLDR.F32 s14, =1
+      BL calculate
+	 ; BX lr	
+
+dataset3
+      VLDR.F32 s12, =1
+	  VLDR.F32 s13, =1
+	  VLDR.F32 s14, =0	
+      BL calculate
+	  ;BX lr	
+dataset4
+      VLDR.F32 s12, =1
+	  VLDR.F32 s13, =1
+	  VLDR.F32 s14, =1
+      BL calculate
+	  ;BX lr  
+	      	  
+
+;calculate w1*x1_w2*x2+w3*x3 is stored in s15
+calculate
+      VCVT.U32.F32 s31,s12
+      VMOV.F32 R0,S31
+      VCVT.U32.F32 s30,s13
+      VMOV.F32 R1,S30
+      VCVT.U32.F32 s29,s14	  
+      VMOV.F32 R2,S29
+	  
+      VLDR.F32 s15, =0
+	  VMLA.F32 s15,s12,s9
+	  VMLA.F32 s15,s13,s10
+	  VMLA.F32 s15,s14,s11
+	  VADD.F32 s15,s15,s16;  z = bias + w1*x1_w2*x2+w3*x3
+	  
+	  BL epwrx	  
+	  VADD.F32 s7,s2,s5; (1+epwrx)
+      VDIV.F32 s8,s5,s7; (1/(1+epwrx))
+	  
+	  ;VMOV.F32 R0,S8	  	  
+	 	  
+;if s8 >0.5 make it as 1 else 0
+;add 0.5 to s8 and store in s18
+;result of digital gate is stored in s19
+	  VLDR.F32 s17, =0.5
+	  VADD.F32 s18,s8,s17;
+
+	  VCVT.U32.F32 s18,s18
+	  VMOV.F32 R3,S18	  	  
+	  BL printMsg4p
+	  ADD R8,#1
+      CMP R8,#2
+	  BEQ dataset2 
+      CMP R4,#0x00000003
+	  BEQ AllGates	  
+      CMP R8,#3
+	  BEQ dataset3
+      CMP R8,#4
+	  BEQ dataset4	  	  	  
+	  B AllGates 
+	  
+epwrx
+      VNEG.F32 s0,S15     
+;Store no of iterations
+	  VLDR.F32 s6, =35
+	 
+;iterations	count i
+
+      VLDR.F32 s4, =1
+	  VLDR.F32 s5, =1
+
+;Product s1	 
+	  VLDR.F32 s1, =1
+
+;result s2	 
+	  VLDR.F32 s2, =1     
+
+Loop  VDIV.F32 s3,s0,s4
+      VMUL.F32 s1,s1,s3
+	  VADD.F32 s2,s2,s1
+	  VADD.F32 s4,s4,s5
+	  VCMP.F32 S4,S6
+	  vmrs APSR_nzcv,FPSCR	  
+	  BLT Loop
+	  BX lr
+ 
+	  
+	
+stop    B stop ; stop program
+      ENDFUNC
+      END 
